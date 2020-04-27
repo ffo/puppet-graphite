@@ -18,7 +18,7 @@ hosts_as('graphite_1').each do |graphite_host|
           class { 'graphite': 
                 secret_key                => '123456789', 
                 gr_base_dir               => '/opt/graphite',
-                gr_django_init_command    => 'PYTHONPATH=/opt/graphite/webapp /usr/local/bin/django-admin.py migrate --setting=graphite.settings --fake-initial && chown www-data /opt/graphite/storage/log/*.log',
+                gr_django_init_command    => 'PYTHONPATH=/opt/graphite/webapp /usr/local/bin/django-admin.py migrate --setting=graphite.settings --fake-initial',
                 gr_django_init_provider   => 'shell',
                 gr_carbon_ver             => '#{graphite_version}',
                 gr_graphite_ver           => '#{graphite_version}',
