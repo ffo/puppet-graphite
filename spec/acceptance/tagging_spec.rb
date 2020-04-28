@@ -5,6 +5,7 @@ hosts_as('graphite_1').each do |graphite_host|
   describe "graphite 1.1 install/update on host #{graphite_host}" do
     let(:graphite_version){ '1.1.7' }
     let(:django_version){ '1.11' }
+    let(:django_tagging_version){ '0.4.6' }
     let(:twisted_version){ '20.3.0' }
 
     it 'has to delete the existing django db to work around failures migrating the database from 0.9' do
@@ -24,6 +25,7 @@ hosts_as('graphite_1').each do |graphite_host|
                 gr_graphite_ver           => '#{graphite_version}',
                 gr_whisper_ver            => '#{graphite_version}',
                 gr_django_ver             => '#{django_version}',
+                gr_django_tagging_ver     => '#{django_tagging_version}',
                 gr_twisted_ver            => '#{twisted_version}',
                 gr_tags_enable            => true,
           }
@@ -39,6 +41,26 @@ hosts_as('graphite_1').each do |graphite_host|
 
       it 'graphite should have received the data' do
         result = on(graphite_host, "sleep 10 && curl -s 'http://127.0.0.1/render?target=seriesByTag(\"arg=key\")&format=raw&from=-5min' | grep 'arg=key,.*42.0'")
+        expect(result.exit_code).to eq 0
+      end
+
+      it 'exist only one link to the egg-info of graphite in the python lib directory' do
+        result = on(graphite_host, "test `ls -d /usr/local/lib/python2.7/dist-packages/graphite_web*.egg-info | wc -l` -eq 1")
+        expect(result.exit_code).to eq 0
+      end
+
+      it 'exist only one egg-info of graphite in the installation directory' do
+        result = on(graphite_host, "test `ls -d /opt/graphite/webapp/graphite_web*.egg-info | wc -l` -eq 1")
+        expect(result.exit_code).to eq 0
+      end
+
+      it 'exist only one link to the egg-info of cabon in the python lib directory' do
+        result = on(graphite_host, "test `ls -d /usr/local/lib/python2.7/dist-packages/carbon*.egg-info | wc -l` -eq 1")
+        expect(result.exit_code).to eq 0
+      end
+
+      it 'exist only one egg-info of carbon in the installation directory' do
+        result = on(graphite_host, "test `ls -d /opt/graphite/lib/carbon*.egg-info | wc -l` -eq 1")
         expect(result.exit_code).to eq 0
       end
     end
